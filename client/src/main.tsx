@@ -8,10 +8,9 @@ import { Theme } from "@radix-ui/themes";
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <StrictMode>
-      <Theme >
+      <Theme>
         <App />
       </Theme>
     </StrictMode>
-    ,
   </BrowserRouter>
 );

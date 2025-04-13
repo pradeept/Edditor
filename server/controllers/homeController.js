@@ -1,5 +1,6 @@
 function homeController(req,res){
-    res.send(200).json({msg:"Success"})
+    console.log(req.isAuthenticated())
+    res.status(200).json({msg:req.user})
 }
 
 export {homeController}

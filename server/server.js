@@ -12,6 +12,7 @@ import { isAuthenticated } from "./utils/isAuth.js";
 
 const app = express();
 
+// CORS setup.
 app.use(cors({
     origin: [process.env.SERVER_HOST, process.env.CLIENT_HOST],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -19,6 +20,8 @@ app.use(cors({
     credentials: true,
 }))
 
+
+// Session middleware uses express-session package. 
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: true,
@@ -26,16 +29,20 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 }
 }))
 
+// Initializing passport and binding with session.
 app.use(passport.initialize())
 app.use(passport.session())
 
+// For reading req body.
 app.use(bodyParser.urlencoded({ extended: true }))
 
 
+// Routes.
 app.use('/auth', loginRouter);
 app.use('/home', isAuthenticated, homeRouter);
 
 
+// Node server listening on PORT.
 app.listen(process.env.PORT, () => {
     console.log(`Server listening at ${process.env.PORT}`)
 })
