@@ -1,23 +1,37 @@
 import { DiGoogleDrive } from "react-icons/di";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { api } from "../utils/axiosConfig";
 import { Button } from "@radix-ui/themes";
 import { FaDownload } from "react-icons/fa6";
 import { useContext } from "react";
-import { MyContext } from "../pages/HomePage";
 import { FiLogOut } from "react-icons/fi";
+import FileSaver from "file-saver";
+import * as quillToWord from "quill-to-word";
+import { textContext } from "../context/TextContext";
 
 export default function NavBar() {
-  const { handleDownload } = useContext(MyContext);
+  const navigate = useNavigate()
+  const {textData} = useContext(textContext);
+
   const handleLogout = () => {
     api
       .get("/auth/logout")
       .then(() => {
-        Navigate("/");
+        navigate("/");
       })
       .catch((e) => {
         console.log(e);
       });
+  };
+
+  const handleDownload = async () => {
+    console.log(textData)
+    const blob = await quillToWord.generateWord(textData, {
+        exportAs: "blob",
+      });
+    
+    const fileName = new Date();
+    FileSaver.saveAs(blob, `${fileName}.docx`);
   };
   return (
     <>
