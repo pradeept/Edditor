@@ -9,6 +9,7 @@ import session from "express-session";
 import passport from "passport";
 import { homeRouter } from "./routes/homeRouter.js";
 import { isAuthenticated } from "./utils/isAuth.js";
+import { driveRouter } from "./routes/driveRouter.js"
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // Routes.
 app.use('/auth', loginRouter);
 app.use('/home', isAuthenticated, homeRouter);
+app.use('/drive', isAuthenticated, driveRouter);
 
 
 // Node server listening on PORT.

@@ -3,15 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../utils/axiosConfig";
 import { Button } from "@radix-ui/themes";
 import { FaDownload } from "react-icons/fa6";
-import { useContext } from "react";
+import { useContext} from "react";
 import { FiLogOut } from "react-icons/fi";
 import FileSaver from "file-saver";
 import * as quillToWord from "quill-to-word";
 import { textContext } from "../context/TextContext";
+import { modalContext } from "../context/ModalContext";
 
 export default function NavBar() {
   const navigate = useNavigate()
   const {textData} = useContext(textContext);
+  const { setIsModalOpen} = useContext(modalContext)
 
   const handleLogout = () => {
     api
@@ -33,6 +35,8 @@ export default function NavBar() {
     const fileName = new Date();
     FileSaver.saveAs(blob, `${fileName}.docx`);
   };
+
+
   return (
     <>
       <nav className=' bg-black text-white grid grid-cols-6 content-center items-stretch'>
@@ -57,7 +61,7 @@ export default function NavBar() {
             </Button>
           </div>
           <div className='flex items-center p-2'>
-            <Button>
+            <Button onClick={()=>setIsModalOpen(true)}>
               Save to drive{" "}
               <DiGoogleDrive size={24} className='cursor-pointer' />
             </Button>

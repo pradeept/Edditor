@@ -8,13 +8,14 @@ const QuillEditor = () => {
   const { setTextData } = useContext(textContext);
 
   const editorRef = useRef(null);
-  const quillRef = useRef(null);
+  const quillRef = useRef<Quill | null>(null);
 
   useEffect(() => {
     if (editorRef.current && !quillRef.current) {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
         placeholder: "Start typing...",
+        
       });
     }
   }, [quillRef.current]);

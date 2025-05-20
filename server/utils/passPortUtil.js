@@ -13,7 +13,8 @@ passport.use(new GoogleStrategy.Strategy({
 },
     function (request, accessToken, refreshToken, profile, done) {
         console.log(profile)
-        return done(null, profile)
+        console.log("accessTOken: "+accessToken)
+        return done(null, {profile,"access":accessToken})
         // User.findOrCreate({ googleId: profile.id }, function (err, user) {
         //     return done(err, user);
         // });

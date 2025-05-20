@@ -5,7 +5,18 @@ import passport from "passport";
 
 
 const googleAuth = passport.authenticate('google', {
-    scope: ['email', 'profile'],
+    /* IMP - drive scope is sensitive and requires developer to publish his app.
+            or add other users email who can allow themselves to make api calls to drive.
+            https://console.cloud.google.com/auth/audience
+          - To ask drive scope from a edditor user developer first has to enable Drive API in GCP/api
+
+       Option 1: For now I've added my personal email ID's hence only those email ids will be able to make 
+           drive call.
+       NOTE: apart from developer users don't have to enable their drive api in console.
+       
+       Option 2: To publish dev need to verify - https://support.google.com/cloud/answer/9110914
+    */
+    scope: ['email', 'profile', "https://www.googleapis.com/auth/drive"],
 })
 
 // Google callback handler.
