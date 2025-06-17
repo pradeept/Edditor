@@ -14,7 +14,7 @@ type contextType = {
 };
 
 export default function UserContext({ children }: contextType) {
-  const [user, setUser] = useState<string>("");
+  const [user, setUser] = useState<string>("User");
   const [email, setEmail] = useState<string>("");
 
   const valueObj = {

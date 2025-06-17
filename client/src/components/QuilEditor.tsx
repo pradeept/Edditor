@@ -15,11 +15,9 @@ const QuillEditor = () => {
       quillRef.current = new Quill(editorRef.current, {
         theme: "snow",
         placeholder: "Start typing...",
-        
       });
     }
   }, [quillRef.current]);
-
 
   useEffect(() => {
     quillRef.current?.on("text-change", () => {
@@ -34,10 +32,9 @@ const QuillEditor = () => {
     };
   }, [quillRef.current]);
 
-
   return (
-    <div className='min-h-40'>
-      <div ref={editorRef} />
+    <div className='py-4'>
+      <div ref={editorRef} className='min-h-[470px] ' />
     </div>
   );
 };

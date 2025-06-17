@@ -1,32 +1,23 @@
-import { Dialog } from "@radix-ui/themes";
+import { Dialog, Spinner } from "@radix-ui/themes";
 import { useContext, useEffect, useState } from "react";
 import { api } from "../utils/axiosConfig";
 import { modalContext } from "../context/ModalContext";
 import { toastContext } from "../context/ToastContext";
-
+import { ToastContainer } from "react-toastify";
+import useToast from "../hooks/toast";
 
 export default function Modal() {
   const { isModalOpen, setIsModalOpen, textData, folderID, setFolderId } =
     useContext(modalContext);
 
-  const {
-    isError,
-    isLoading,
-    setIsLoading,
-    isToastOpen,
-    setIsToastOpen,
-    setIsError,
-    errorMessage,
-    setErrorMessage,
-  } = useContext(toastContext);
-
+  const { isLoading, setIsLoading, isToastOpen, setIsToastOpen } =
+    useContext(toastContext);
   const [fileName, setFileName] = useState<string>(
     new Date().getTime().toString()
   );
   const [filesList, setFilesList] = useState<string[]>([]);
 
-  
-  // refactor this to show toast
+  const showToast = useToast();
 
   const files = () => {
     const filename = [];
@@ -39,6 +30,8 @@ export default function Modal() {
 
   useEffect(() => {
     if (isModalOpen) getFiles();
+  setIsLoading(true);
+
   }, [isModalOpen]);
 
   const createFolder = async () => {
@@ -53,34 +46,39 @@ export default function Modal() {
   };
 
   const getFiles = async () => {
-    try {
-      const folderResponse = await api.get("/drive/folder-id");
-      if (folderResponse.data.data) {
-        const { files } = folderResponse.data.data;
-        if (!files.empty) {
-          setFolderId(files[0]);
-          console.log(folderID);
+    // if folderID is null
+    // get the folderID - if it returns error - create the folder
+    // otherwise user the folderID and get files.
+    if (folderID === null) {
+      try {
+        const folderResponse = await api.get("/drive/folder-id");
+        if (folderResponse.data.data) {
+          const { files } = folderResponse.data.data;
+          if (!files.empty) {
+            setFolderId(files[0]);
+            console.log(folderID);
+          }
         }
-      }
-      if (folderID === null) {
-        try {
-          const filesResponse = await api.get("/drive/files");
-        } catch (e) {
-          console.log(e);
+        // If folder does not exist in drive:
+        if (folderID === null) {
+          const fd = new FormData();
+          fd.append("name", "edditor_saves");
+          try {
+            const createFolder = await api.post("/drive/create-folder", fd);
+          } catch (e) {
+            console.log(e);
+          }
+        } else {
+          // if exists
+          try {
+            const filesResponse = await api.get("/drive/files");
+          } catch (e) {
+            console.log(e);
+          }
         }
+      } catch (e) {
+        console.log(e);
       }
-      //if folder name edditor_saves exist ? skip : create-folder
-    } catch (e) {
-      console.log(e);
-      // if (folderResponse.status == 400) {
-      //   const fd = new FormData();
-      //   fd.append("name", "edditor_saves");
-      //   try {
-      //     const createFolder = await api.post("/drive/create-folder", fd);
-      //   } catch (e) {
-      //     console.log(e);
-      //   }
-      // }
     }
   };
 
@@ -94,29 +92,36 @@ export default function Modal() {
     } catch (e) {
       console.log(e);
     }
-    setIsToastOpen(true);
+    showToast("success", "Success!");
   };
 
   return (
     <>
       <Dialog.Root open={isModalOpen}>
         <Dialog.Content maxWidth='450px' className=''>
+          <ToastContainer />
           <Dialog.Title>Save as</Dialog.Title>
           <Dialog.Description size='2' mb='4'>
             Edditor_saves/<b>{`${fileName}.docx`}</b>
           </Dialog.Description>
-          <div className='border overflow-scroll max-h-[350px]'>
-            {filenames.map((item, index) => {
-              return (
-                <p
-                  key={index}
-                  onClick={(e) => setFileName(e.target.textContent)}
-                  className='cursor-pointer'
-                >
-                  {item}
-                </p>
-              );
-            })}
+          <div className='border overflow-scroll max-h-[350px]  '>
+            {isLoading ? (
+              <div className='flex justify-center items-center min-h-[250px]'>
+                <Spinner />
+              </div>
+            ) : (
+              filenames.map((item, index) => {
+                return (
+                  <p
+                    key={index}
+                    onClick={(e) => setFileName(e.target.textContent)}
+                    className='cursor-pointer'
+                  >
+                    {item}
+                  </p>
+                );
+              })
+            )}
           </div>
           <div>
             <input
@@ -130,7 +135,7 @@ export default function Modal() {
           </div>
           <div className='flex justify-around mt-[1rem]'>
             <button
-              disabled={fileName === "" ? true : false}
+              disabled={fileName === "" || isLoading ? true : false}
               onClick={handleSave}
               className='bg-blue-500 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-2 px-4 rounded active:border-none'
             >

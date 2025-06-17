@@ -9,11 +9,13 @@ import FileSaver from "file-saver";
 import * as quillToWord from "quill-to-word";
 import { textContext } from "../context/TextContext";
 import { modalContext } from "../context/ModalContext";
+import { userContext } from "../context/UserContext";
 
 export default function NavBar() {
   const navigate = useNavigate()
   const {textData} = useContext(textContext);
   const { setIsModalOpen} = useContext(modalContext)
+  const {user} = useContext(userContext);
 
   const handleLogout = () => {
     api
@@ -41,7 +43,7 @@ export default function NavBar() {
     <>
       <nav className=' bg-black text-white grid grid-cols-6 content-center items-stretch'>
         <div className='col-span-2 flex flex-col justify-center items-start pl-2'>
-          <h2>Welcome User ...!</h2>
+          <h2>Welcome {user} ...!</h2>
         </div>
         <div className='col-span-2 flex flex-col justify-center items-center pl-2 '>
           <h1 className='text-2xl font-semibold'>
