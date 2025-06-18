@@ -41,7 +41,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // Routes.
 app.use('/auth', loginRouter);
 app.use('/home', isAuthenticated, homeRouter);
-app.use('/drive', isAuthenticated, driveRouter);
+app.use('/drive',  driveRouter);
 
 
 // Node server listening on PORT.

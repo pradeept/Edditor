@@ -6,6 +6,11 @@ import { toastContext } from "../context/ToastContext";
 import { ToastContainer } from "react-toastify";
 import useToast from "../hooks/toast";
 
+type fileObj = {
+  id: string;
+  name: string;
+};
+
 export default function Modal() {
   const { isModalOpen, setIsModalOpen, textData, folderID, setFolderId } =
     useContext(modalContext);
@@ -15,70 +20,85 @@ export default function Modal() {
   const [fileName, setFileName] = useState<string>(
     new Date().getTime().toString()
   );
-  const [filesList, setFilesList] = useState<string[]>([]);
+  const [filesList, setFilesList] = useState<[fileObj] | null>(null);
 
   const showToast = useToast();
 
-  const files = () => {
-    const filename = [];
-    for (let i = 0; i < 25; i++) {
-      filename.push(`file_${i}`);
-    }
-    return filename;
-  };
-  const filenames: string[] = files();
-
   useEffect(() => {
-    if (isModalOpen) getFiles();
-  setIsLoading(true);
-
+    if (isModalOpen) {
+      setIsLoading(true);
+      getFiles();
+    }
   }, [isModalOpen]);
 
+  useEffect(() => {
+    // If folder does not exist in drive
+    if (isModalOpen && folderID === null) {
+      createFolder();
+    } else if (isModalOpen) {
+      fetchFiles();
+    }
+  }, [folderID]);
+
   const createFolder = async () => {
-    const response = await api.get("/drive/create-folder");
+    const folderResponse = await api.post("/drive/create-folder");
+    console.log(folderResponse);
     if (folderResponse.data.data) {
-      const { files } = folderResponse.data.data;
-      if (!files.empty) {
-        setFolderId(files[0]);
+      const { id } = folderResponse.data.data;
+      if (id) {
+        setFolderId(id);
         console.log(folderID);
+        showToast("success", "Folder created successfully");
+      } else {
+        showToast("error", "Folder creation failed!");
       }
     }
+    setIsLoading(false);
   };
 
+
   const getFiles = async () => {
-    // if folderID is null
-    // get the folderID - if it returns error - create the folder
-    // otherwise user the folderID and get files.
+    // When there is no folderID in context
     if (folderID === null) {
       try {
+        // Get folder ID if it already exists in drive
         const folderResponse = await api.get("/drive/folder-id");
         if (folderResponse.data.data) {
           const { files } = folderResponse.data.data;
+          console.log(files);
           if (!files.empty) {
-            setFolderId(files[0]);
-            console.log(folderID);
-          }
-        }
-        // If folder does not exist in drive:
-        if (folderID === null) {
-          const fd = new FormData();
-          fd.append("name", "edditor_saves");
-          try {
-            const createFolder = await api.post("/drive/create-folder", fd);
-          } catch (e) {
-            console.log(e);
-          }
-        } else {
-          // if exists
-          try {
-            const filesResponse = await api.get("/drive/files");
-          } catch (e) {
-            console.log(e);
+            const folderIDlocal = files[0].id;
+            setFolderId(files[0].id);
+            console.log("FolderIDlocal: ", folderIDlocal);
+            //Fetch files goes here
           }
         }
       } catch (e) {
         console.log(e);
+        showToast(
+          "error",
+          "Something went wrong while fetchign files. Please try again later!"
+        );
       }
+    } else {
+      await fetchFiles();
+    }
+  };
+
+  const fetchFiles = async () => {
+    try {
+      const filesResponse = await api.get("/drive/files", {
+        params: { folderID: folderID },
+      });
+      setFilesList(filesResponse.data.data.files);
+      console.log("Files: ", filesResponse.data.data.files);
+      console.log("Files List: ", filesList);
+
+      setIsLoading(false);
+    } catch (e) {
+      showToast("error", e.message);
+      setIsLoading(false);
+      console.log(e);
     }
   };
 
@@ -88,11 +108,12 @@ export default function Modal() {
     fd.append("fileName", fileName);
     fd.append("folderID", folderID);
     try {
-      const uploadResponse = await api.post("/drive/upload", fd);
+      await api.post("/drive/upload", fd);
+      showToast("success", "Success!");
     } catch (e) {
+      showToast("error", "Something went wrong while saving the file!");
       console.log(e);
     }
-    showToast("success", "Success!");
   };
 
   return (
@@ -104,20 +125,25 @@ export default function Modal() {
           <Dialog.Description size='2' mb='4'>
             Edditor_saves/<b>{`${fileName}.docx`}</b>
           </Dialog.Description>
-          <div className='border overflow-scroll max-h-[350px]  '>
+          <div className='border overflow-scroll min-h-[350px]  '>
             {isLoading ? (
               <div className='flex justify-center items-center min-h-[250px]'>
                 <Spinner />
               </div>
+            ) : filesList === null ? (
+              <div className='flex justify-center items-center min-h-[250px]'>
+                <p>No files found!</p>
+              </div>
             ) : (
-              filenames.map((item, index) => {
+              filesList.map((item) => {
                 return (
                   <p
-                    key={index}
+                    key={item.id}
                     onClick={(e) => setFileName(e.target.textContent)}
-                    className='cursor-pointer'
+                    className='cursor-pointer p-4'
                   >
-                    {item}
+                    {item.name}
+                    <hr />
                   </p>
                 );
               })
