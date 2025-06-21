@@ -4,7 +4,9 @@ import { api } from "../utils/axiosConfig";
 import { modalContext } from "../context/ModalContext";
 import { toastContext } from "../context/ToastContext";
 import { ToastContainer } from "react-toastify";
-import useToast from "../hooks/toast";
+import useToast from "../hooks/useToast";
+import * as quillToWord from "quill-to-word";
+import { textContext } from "../context/TextContext";
 
 type fileObj = {
   id: string;
@@ -12,11 +14,15 @@ type fileObj = {
 };
 
 export default function Modal() {
-  const { isModalOpen, setIsModalOpen, textData, folderID, setFolderId } =
+  //@ts-ignore
+  const { isModalOpen, setIsModalOpen, folderID, setFolderId } =
     useContext(modalContext);
 
-  const { isLoading, setIsLoading, isToastOpen, setIsToastOpen } =
-    useContext(toastContext);
+  //@ts-ignore
+  const { textData } = useContext(textContext);
+
+  //@ts-ignore
+  const { isLoading, setIsLoading } = useContext(toastContext);
   const [fileName, setFileName] = useState<string>(
     new Date().getTime().toString()
   );
@@ -55,7 +61,6 @@ export default function Modal() {
     }
     setIsLoading(false);
   };
-
 
   const getFiles = async () => {
     // When there is no folderID in context
@@ -96,6 +101,7 @@ export default function Modal() {
 
       setIsLoading(false);
     } catch (e) {
+      //@ts-ignore
       showToast("error", e.message);
       setIsLoading(false);
       console.log(e);
@@ -103,8 +109,14 @@ export default function Modal() {
   };
 
   const handleSave = async () => {
+    isLoading(true);
+    const blob = await quillToWord.generateWord(textData, {
+      exportAs: "blob",
+    });
+
     const fd = new FormData();
-    fd.append("file", textData);
+    //@ts-ignore
+    fd.append("file", blob, fileName);
     fd.append("fileName", fileName);
     fd.append("folderID", folderID);
     try {
@@ -112,7 +124,9 @@ export default function Modal() {
       showToast("success", "Success!");
     } catch (e) {
       showToast("error", "Something went wrong while saving the file!");
-      console.log(e);
+    } finally {
+      isLoading(false);
+      isModalOpen(false);
     }
   };
 
@@ -123,7 +137,7 @@ export default function Modal() {
           <ToastContainer />
           <Dialog.Title>Save as</Dialog.Title>
           <Dialog.Description size='2' mb='4'>
-            Edditor_saves/<b>{`${fileName}.docx`}</b>
+            edditor_saves/<b>{`${fileName}.docx`}</b>
           </Dialog.Description>
           <div className='border overflow-scroll min-h-[350px]  '>
             {isLoading ? (
@@ -139,6 +153,7 @@ export default function Modal() {
                 return (
                   <p
                     key={item.id}
+                    //@ts-ignore
                     onClick={(e) => setFileName(e.target.textContent)}
                     className='cursor-pointer p-4'
                   >

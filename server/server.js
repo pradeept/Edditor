@@ -21,7 +21,6 @@ app.use(cors({
     credentials: true,
 }))
 
-
 // Session middleware uses express-session package. 
 app.use(session({
     secret: process.env.SESSION_SECRET,

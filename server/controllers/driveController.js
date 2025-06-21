@@ -1,5 +1,7 @@
 import axios from "axios";
 import * as fs from "fs";
+import FormData from "form-data";
+
 
 const FOLDER_NAME = "edditor_saves";
 const DRIVE_BASE_URL = "https://www.googleapis.com/drive/v3/files"
@@ -7,8 +9,6 @@ const DRIVE_BASE_URL = "https://www.googleapis.com/drive/v3/files"
 
 const searchFolder = async (req, res) => {
     const ACCESS_TOKEN = req.session.passport.user.access
-    // console.log(req.session.passport)
-    console.log("search folder: ", ACCESS_TOKEN);
     const query = `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     try {
         const response = await axios.get(DRIVE_BASE_URL, {
@@ -91,8 +91,61 @@ const listFiles = async (req, res) => {
 
 
 
-const uploadFile = (req, res) => {
-    const { blob, fileName, folderID } = req.query.params
-}
+
+const uploadFile = async (req, res) => {
+    const ACCESS_TOKEN = req.session.passport.user.access;
+    const { folderID, fileName } = req.body;
+    const file = req.file; // from multer middleware
+
+    if (!file || !fileName || !folderID) {
+        return res.status(400).json({ error: 'Missing file, fileName, or folderID' });
+    }
+
+    // Metadata
+    const metadata = {
+        name: `${fileName}.docx`,
+        parents: [folderID],
+        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    };
+
+    const fd = new FormData();
+
+    // Append metadata as JSON string
+    fd.append("metadata", JSON.stringify(metadata), {
+        contentType: "application/json"
+    });
+
+    // Append file stream with proper content type and filename
+    fd.append("file", fs.createReadStream(file.path), {
+        contentType: metadata.mimeType,
+        filename: `${fileName}.docx`
+    });
+
+    try {
+        const uploadResponse = await axios.post(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            fd,
+            {
+                headers: {
+                    Authorization: `Bearer ${ACCESS_TOKEN}`,
+                    ...fd.getHeaders()
+                }
+            }
+        );
+
+        console.log(uploadResponse.data);
+        res.status(200).json({ msg: "Uploaded successfully", file: uploadResponse.data });
+    } catch (e) {
+        console.error("Upload error:", e);
+        res.status(500).json({ msg: "Upload failed", error: e.message });
+    } finally {
+        try {
+            await fs.unlink(file.path); 
+        } catch (cleanupErr) {
+            console.error("Cleanup failed:", cleanupErr);
+        }
+    }
+};
+
 
 export { searchFolder, listFiles, createFolder, uploadFile }

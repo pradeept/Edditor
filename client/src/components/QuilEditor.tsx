@@ -5,6 +5,7 @@ import "quill/dist/quill.snow.css";
 import { textContext } from "../context/TextContext";
 
 const QuillEditor = () => {
+  //@ts-ignore
   const { setTextData } = useContext(textContext);
 
   const editorRef = useRef(null);
