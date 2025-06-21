@@ -7,11 +7,11 @@
 - Rich text editor.
 - Download your work locally in a document format.
 - Save your work to your Google Drive (this feature is limited).
-- Work will be saved inside folder ``edditor_saves`` (no need to create separately).
+- Work will be saved inside folder ``edditor_saves`` (no need to create the folder separately).
 
-NOTE: Saving to google drive requires the developer to publish their app into Google Marketplace (includes purchases). Visit [Google Drive API]() for more details. 
+NOTE: Saving to google drive requires the developer to publish their app into Google Marketplace (includes purchases). Visit [Google Drive API](https://support.google.com/cloud/answer/13463073?visit_id=638861147527513797-2448590221&rd=1) for more details. 
 
-We can utilize [Test users]() version.
+- Here we are utilizing [Test users](#1-google-console-setup) (Limited to Dev).
 
 ## Demonstration 🎞️
 [![Demonstration Video will be added soon!]()]()
@@ -30,15 +30,24 @@ We can utilize [Test users]() version.
 
 ### 1. Google Console Setup
 - Create a project in the console.
+
 ![alt text](image-2.png)
+
 - Choose the newly created project and create a client - which will give the "Client ID and Client Secret.
+
 ![alt text](image-3.png)
+
 - Configure Audience / Test users.
 NOTE: only the added test users will be able to login and upload their work to their respective google drives. 
+
 ![alt text](image-4.png)
+
 - Select the above created client and set "Authorized Origins" and "Authorized redirect URIs" .
+
 ![alt text](image.png)
+
 - Go to Data Access tab and set appropriate scopes.
+
 ![alt text](image-1.png)
 
 ### 2. App Setup & Running locally
