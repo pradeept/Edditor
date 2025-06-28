@@ -71,18 +71,21 @@ export default function Modal() {
         if (folderResponse.data.data) {
           const { files } = folderResponse.data.data;
           console.log(files);
-          if (!files.empty) {
+          if (files.length != 0) {
             const folderIDlocal = files[0].id;
             setFolderId(files[0].id);
             console.log("FolderIDlocal: ", folderIDlocal);
             //Fetch files goes here
+          }else{
+            console.log("here")
+            createFolder()
           }
         }
       } catch (e) {
         console.log(e);
         showToast(
           "error",
-          "Something went wrong while fetchign files. Please try again later!"
+          e.status == 403 ? "Authentication failed! Please refresh the page to login" : e.message
         );
       }
     } else {
@@ -109,7 +112,7 @@ export default function Modal() {
   };
 
   const handleSave = async () => {
-    isLoading(true);
+    setIsLoading(true);
     const blob = await quillToWord.generateWord(textData, {
       exportAs: "blob",
     });
@@ -125,8 +128,8 @@ export default function Modal() {
     } catch (e) {
       showToast("error", "Something went wrong while saving the file!");
     } finally {
-      isLoading(false);
-      isModalOpen(false);
+      setIsLoading(false);
+      setIsModalOpen(false);
     }
   };
 
@@ -144,7 +147,7 @@ export default function Modal() {
               <div className='flex justify-center items-center min-h-[250px]'>
                 <Spinner />
               </div>
-            ) : filesList === null ? (
+            ) : filesList === null || filesList.length === 0 ? (
               <div className='flex justify-center items-center min-h-[250px]'>
                 <p>No files found!</p>
               </div>

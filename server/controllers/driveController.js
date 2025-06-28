@@ -8,6 +8,10 @@ const DRIVE_BASE_URL = "https://www.googleapis.com/drive/v3/files"
 
 
 const searchFolder = async (req, res) => {
+    if (req.session.passport == undefined) {
+        res.status(403).json({ msg: "Authentication required" });
+        return
+    }
     const ACCESS_TOKEN = req.session.passport.user.access
     const query = `name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     try {
@@ -34,6 +38,10 @@ const searchFolder = async (req, res) => {
 }
 
 const createFolder = async (req, res) => {
+    if (req.session.passport == undefined) {
+        res.status(403).json({ msg: "Authentication required" });
+        return
+    }
     const ACCESS_TOKEN = req.session.passport.user.access;
 
     const reqBody = {
@@ -60,6 +68,10 @@ const createFolder = async (req, res) => {
 
 
 const listFiles = async (req, res) => {
+    if (req.session.passport == undefined) {
+        res.status(403).json({ msg: "Authentication required" });
+        return
+    }
     const ACCESS_TOKEN = req.session.passport.user.access;
     const { folderID } = req.query;
 
@@ -93,6 +105,10 @@ const listFiles = async (req, res) => {
 
 
 const uploadFile = async (req, res) => {
+    if (req.session.passport == undefined) {
+        res.status(403).json({ msg: "Authentication required" });
+        return
+    }
     const ACCESS_TOKEN = req.session.passport.user.access;
     const { folderID, fileName } = req.body;
     const file = req.file; // from multer middleware
@@ -140,7 +156,14 @@ const uploadFile = async (req, res) => {
         res.status(500).json({ msg: "Upload failed", error: e.message });
     } finally {
         try {
-            await fs.unlink(file.path); 
+            console.log(file)
+            console.log(file.path)
+            await fs.unlink(file.path, err => {
+                if (err) console.log(err);
+                else {
+                    console.log("File deleted successfully");
+                }
+            });
         } catch (cleanupErr) {
             console.error("Cleanup failed:", cleanupErr);
         }
