@@ -1,6 +1,9 @@
 # EDDITOR
 #### Edditor is a rich text editor built using React.js, Express.js and other libraries.
 
+## Demonstration 🎞️
+Demonstration Video - [YouTube](https://youtu.be/_uJ5K92zylA)
+
 ## Features ✨
 
 - Seamless Google Oauth Login.
@@ -12,9 +15,6 @@
 NOTE: Saving to google drive requires the developer to publish their app into Google Marketplace (includes purchases). Visit [Google Drive API](https://support.google.com/cloud/answer/13463073?visit_id=638861147527513797-2448590221&rd=1) for more details. 
 
 - Here we are utilizing [Test users](#1-google-console-setup) (Limited to Dev).
-
-## Demonstration 🎞️
-[Demonstration Video](https://youtu.be/_uJ5K92zylA)
 
 ## Tech Stack 🤖
 
